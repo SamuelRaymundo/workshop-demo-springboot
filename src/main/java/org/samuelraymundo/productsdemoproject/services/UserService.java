@@ -1,5 +1,6 @@
 package org.samuelraymundo.productsdemoproject.services;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.samuelraymundo.productsdemoproject.entities.User;
 import org.samuelraymundo.productsdemoproject.repositories.UserRepository;
@@ -36,7 +37,6 @@ public class UserService {
     public void delete(Long id) {
         findById(id);
         try {
-
             repository.deleteById(id);
         }
         catch (EmptyResultDataAccessException e) {
@@ -49,9 +49,14 @@ public class UserService {
 
 
     public User update(Long id, User user) {
-        User entity = repository.getReferenceById(id);
-        updateData(entity, user);
-        return repository.save(entity);
+        try {
+            User entity = repository.getReferenceById(id);
+            updateData(entity, user);
+            return repository.save(entity);
+        }
+        catch(EntityNotFoundException e) {
+            throw new ResourceNotFoundException(id);
+        }
     }
 
     private void updateData(User entity, User user) {
